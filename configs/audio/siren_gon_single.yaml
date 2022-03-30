@@ -1,0 +1,53 @@
+train_dataset:
+  dataset:
+    name: VCTK-single
+    args:
+      root_path: /data/datasets
+  wrapper:
+    name: audio-chunked
+    args:
+      chunk_len: 0.02
+      coord_scale: 1
+      gt_sr: 16000
+  batch_size: 32
+
+val_dataset:
+  dataset:
+    name: VCTK-single
+    args:
+      root_path: /data/datasets
+  wrapper:
+    name: audio-chunked
+    args:
+      chunk_len: 0.02
+      coord_scale: 1
+      gt_sr: 16000
+  batch_size: 8
+
+model:
+  name: siren
+  args:
+    dim_in: 17   # 256 + 1
+    dim_hidden: 256
+    dim_out: 1
+    num_layers: 5
+    w0_initial: 30.0
+    w0: 10.0
+
+loss: l2
+enc_loss: l2
+latent_dim: 16
+
+optimizer:
+  name: adam
+  args:
+    lr: 1.0e-4
+epoch_max: 3000
+multi_step_lr:
+  milestones: [500, 700, 1500, 2500]
+  gamma: 0.5
+
+
+epoch_val: 50
+epoch_save: 100
+# resume: /data/sss/save/gon_single_16_14_enc_l2_2step/epoch-last.pth

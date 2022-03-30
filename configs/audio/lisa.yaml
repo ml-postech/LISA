@@ -1,0 +1,111 @@
+train_dataset:
+  dataset:
+    name: VCTK
+    args:
+      root_path: /data/datasets
+      split: train
+  wrapper:
+    name: audio-chunked-liif
+    args:
+      chunk_len: 1
+      coord_scale: 1
+      input_sr: 8000
+      gt_sr: 48000
+      gt_aug_max: 3
+      sample_q: 8000
+  batch_size: 64
+
+val_dataset:
+  dataset:
+    name: VCTK
+    args:
+      root_path: /data/datasets
+      split: val
+  wrapper:
+    name: audio-chunked-liif
+    args:
+      chunk_len: 1
+      coord_scale: 1
+      input_sr: 12000
+      gt_sr: 48000
+  batch_size: 8
+
+
+model:
+  name: lisa-enc
+  args:
+    imnet_spec:
+      name: siren+
+      args:
+        dim_in: 1   # latent_dim + 1
+        dim_hidden: 128
+        dim_out: 1
+        dim_latent: 96
+        num_layers: 5
+        w0_initial: 1.0
+        w0: 1.0
+        relu: True
+    encoder_spec:
+      name: conv-enc
+      args:
+        latent_dim: 32
+        in_dim: 1
+        kernel_size: 7
+        stride: 1
+    local_ensemble: True
+    feat_unfold: True
+    cell_decode: False
+    latent_dim: 32
+
+# model:
+#   name: lisa-enc
+#   args:
+#     imnet_spec:
+#       name: siren+
+#       args:
+#         dim_in: 1   
+#         dim_hidden: 256
+#         dim_out: 1
+#         # dim_latent: 843   # group = 2
+#         dim_latent: 498   # group = 1
+#         num_layers: 5
+#         w0_initial: 1.0
+#         w0: 1.0
+#         relu: True
+#     encoder_spec:
+#       name: waveglow-enc
+#       args:
+#         mu: 256
+#         embed_dim: 64
+#         n_group: 1
+#     local_ensemble: True
+#     feat_unfold: True
+#     cell_decode: False
+#     # latent_dim: 166
+
+loss: l1
+
+optimizer:
+  name: adam
+  args:
+    lr: 1.0e-3
+
+epoch_max: 50
+multi_step_lr:
+  milestones: [10,20,25,30,35,40]
+  gamma: 0.5
+
+# epoch_max: 500
+# multi_step_lr:
+#   milestones: [100,150,200,250,300,350,400,450, 800]
+#   gamma: 0.5
+
+# epoch_max: 500
+# multi_step_lr:
+#   milestones: [100,200,250,300,350,400,450, 800]
+#   gamma: 0.5
+
+
+epoch_val: 1
+epoch_save: 100
+resume: /data/sss/save/final_4x/epoch-last.pth
